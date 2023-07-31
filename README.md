@@ -15,17 +15,17 @@ Boat object has the following data structure _(all attributes are required)_:
 * `slug`: URL friendly representation of boat's name, must be unique across all the boats
 
 1. Prepare Controller CRUD operations and appropriate routing to allow these actions:
-   * Create boat:
-     * Create a simple html form where user can input boat name and category
-     * Display validation errors if any
-     * Css styling is not required
-   * View specific boat _(html view is not required)_
-   * Edit specific boat _(html view is not required)_
-   * Delete specific boat
+    * Create boat:
+        * Create a simple html form where user can input boat name and category
+        * Display validation errors if any
+        * Css styling is not required
+    * View specific boat _(html view is not required)_
+    * Edit specific boat _(html view is not required)_
+    * Delete specific boat
 2. Add request validation based on previous requirements
 3. Add php test to:
-   * Check that 2 boats with the same 'name' can be created
-   * Check that validation fails if user submits non-allowed category
+    * Check that 2 boats with the same 'name' can be created
+    * Check that validation fails if user submits non-allowed category
 
 ## Optional features ##
 
