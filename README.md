@@ -43,4 +43,4 @@ When all your code is committed and pushed create a pull request to the original
 
 The code will be reviewed and commented.
 
-If you have any questions don't hesitate to ask [peter.matik@dev.boataround.com](mailto:peter.matik@dev.boataround.com)
+If you have any questions don't hesitate to ask [miro@boataround.com](mailto:miro@boataround.com)
