@@ -85,10 +85,7 @@ class BoatController extends Controller
         // Parameter is a string (slug)
         $boat = Boat::where('slug', $idOrSlug)->firstOrFail();
     }
-    dd($boat);
-
-    // Now you have the $boat object, you can proceed with displaying it
-    // For example, return a view with the boat data
+    
     return view('boats.show', compact('boat'));
 }
     /**

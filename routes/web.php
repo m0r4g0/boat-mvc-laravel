@@ -16,8 +16,8 @@ use App\Http\Controllers\BoatController;
 
 Route::group(['middleware' => 'web'], function () {
     Route::get('/boats/create', [BoatController::class, 'create'])->name('boats.create');
-    Route::get('/boats/{slug}', [BoatController::class, 'show'])->where('slug', '[a-z0-9-]+');
-    Route::get('/boats/{id}', [BoatController::class, 'index'])->name('boats.index');
+    Route::get('/boats/{slug}', [BoatController::class, 'show'])->where('slug', '[a-z0-9-]+')->name('boats.showId');;
+    Route::get('/boats/{id}', [BoatController::class, 'show'])->where('id', '[0-9]+')->name('boats.showSlug');;
     Route::get('/boats', [BoatController::class, 'index'])->name('boats.index');
     Route::post('/boats', [BoatController::class, 'store'])->name('boats.store');
     Route::get('/boats/{boat}/edit', [BoatController::class, 'edit'])->name('boats.edit');

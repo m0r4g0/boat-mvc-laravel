@@ -23,7 +23,7 @@
             <tbody>
                 @foreach ($boats as $boat)
                     <tr>
-                        <td>{{ $boat->id }}</td>
+                        <td><a href="{{ route('boats.showId', $boat->id) }}">{{ $boat->id }}</a></td>
                         <td>{{ $boat->slug }}</td>
                         <td>{{ $boat->name }}</td>
                         <td>{{ $boat->category }}</td>
