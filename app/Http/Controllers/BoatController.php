@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+
 
 
 class BoatController extends Controller
@@ -33,50 +35,62 @@ class BoatController extends Controller
      */
     public function store(Request $request)
     {
-        // Add the slug to the request data for validation
-        $slug = Str::slug($request->name);
-        $request->merge(['slug' => $slug]);
-
+        // Validate the request data
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
-            'category' => ['required', Rule::in(['sailing-yacht', 'motor-boat'])]
+            'category' => ['required', Rule::in(['sailing-yacht', 'motor-boat'])],
         ]);
-      
-
-        // Add the custom validation rule for the slug field
-        $validator->sometimes('slug', [function ($attribute, $value, $fail) use ($slug) {
-            // Check if the slug already exists in the database
-            if (Boat::where('slug', $slug)->exists()) {
-                // Throw a validation error if the slug already exists
-                $fail('The '.$attribute.' must be unique based on the name.');
-            }
-        }], function ($input) {
-            // Only apply the custom validation rule if the 'slug' field is present in the request
-            return isset($input['slug']);
-        });
-
+    
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
+    
+        // Generate the slug from the provided name
+        $slug = Str::slug($request->name);
+    
+        // Use database transaction with locking to ensure atomicity and prevent race conditions
+        DB::transaction(function () use ($request, $slug) {
+            // Lock the boats table to prevent other users from accessing it until the transaction is complete
+            Boat::lockForUpdate()->get();
+    
+            // Check if the slug already exists in the database
+            $existingBoat = Boat::where('slug', $slug)->first();
 
-        // If the slug already exists, validation will fail
-        // No need for manual check
-        $boat = new Boat();
-        $boat->name = $request->name;
-        $boat->category = $request->category;
-        $boat->slug = $slug;
-        $boat->save();
+            if ($existingBoat) {
+                // If the exact slug exists, generate a new slug with an incremental number
+                $count = Boat::where('slug', 'like', $slug . '-%')->count();
+                $slug = $slug . '-' . ($count + 1);
+            }
+    
+            // Create the boat
+            Boat::create([
+                'name' => $request->name,
+                'category' => $request->category,
+                'slug' => $slug,
+            ]);
+        });
     
         return redirect()->route('boats.index')->with('success', 'Boat created successfully.');
     }
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        return view('boats.edit', compact('boat'));
+    public function show(string $idOrSlug)
+{
+    // Check if the parameter is numeric (ID) or a string (slug)
+    if (ctype_digit($idOrSlug)) {
+        // Parameter is numeric (ID)
+        $boat = Boat::findOrFail($idOrSlug);
+    } else {
+        // Parameter is a string (slug)
+        $boat = Boat::where('slug', $idOrSlug)->firstOrFail();
     }
+    dd($boat);
 
+    // Now you have the $boat object, you can proceed with displaying it
+    // For example, return a view with the boat data
+    return view('boats.show', compact('boat'));
+}
     /**
      * Show the form for editing the specified resource.
      */

@@ -10,17 +10,34 @@
     @if ($boats->isEmpty())
         <p>No boats found.</p>
     @else
-        <ul>
-            @foreach ($boats as $boat)
-                <li>{{ $boat->name }} - {{ $boat->category }}
-                    <a href="{{ route('boats.edit', $boat->id) }}" class="btn btn-sm btn-primary">Edit</a>
-                    <form action="{{ route('boats.destroy', $boat->id) }}" method="POST" style="display: inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                    </form>
-                </li>
-            @endforeach
-        </ul>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Slug</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($boats as $boat)
+                    <tr>
+                        <td>{{ $boat->id }}</td>
+                        <td>{{ $boat->slug }}</td>
+                        <td>{{ $boat->name }}</td>
+                        <td>{{ $boat->category }}</td>
+                        <td>
+                            <a href="{{ route('boats.edit', $boat->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                            <form action="{{ route('boats.destroy', $boat->id) }}" method="POST" style="display: inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
     @endif
 @endsection
