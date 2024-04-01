@@ -57,9 +57,16 @@ class BoatController extends Controller
             $existingBoat = Boat::where('slug', $slug)->first();
 
             if ($existingBoat) {
-                // If the exact slug exists, generate a new slug with an incremental number
-                $count = Boat::where('slug', 'like', $slug . '-%')->count();
-                $slug = $slug . '-' . ($count + 1);
+                // If the exact slug exists, find the maximum appended number
+                $maxAppendedNumber = Boat::where('slug', 'like', $slug . '-%')
+                    ->get()
+                    ->map(function ($boat) use ($slug) {
+                        return intval(str_replace($slug . '-', '', $boat->slug));
+                    })
+                    ->max();
+
+                // Increment the maximum number by 1 to generate the new slug
+                $slug = $slug . '-' . ($maxAppendedNumber + 1);
             }
     
             // Create the boat
@@ -76,18 +83,19 @@ class BoatController extends Controller
      * Display the specified resource.
      */
     public function show(string $idOrSlug)
-{
-    // Check if the parameter is numeric (ID) or a string (slug)
-    if (ctype_digit($idOrSlug)) {
-        // Parameter is numeric (ID)
-        $boat = Boat::findOrFail($idOrSlug);
-    } else {
-        // Parameter is a string (slug)
-        $boat = Boat::where('slug', $idOrSlug)->firstOrFail();
+    {
+        // Check if the parameter is numeric (ID) or a string (slug)
+        if (ctype_digit($idOrSlug)) {
+            // Parameter is numeric (ID)
+            $boat = Boat::findOrFail($idOrSlug);
+        } else {
+            // Parameter is a string (slug)
+            $boat = Boat::where('slug', $idOrSlug)->firstOrFail();
+        }
+
+        return view('boats.show', compact('boat'));
     }
     
-    return view('boats.show', compact('boat'));
-}
     /**
      * Show the form for editing the specified resource.
      */
