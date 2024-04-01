@@ -1,13 +1,14 @@
 {
-    "name": "laravel/laravel",
+    "name": "m0r4g0/boat-mvc-laravel",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Simple Laravel MVC App",
+    "version": "1.0.0",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
-        "guzzlehttp/guzzle": "^7.2",
+        "php": "^8.3",
         "laravel/framework": "^11.0",
+        "guzzlehttp/guzzle": "^7.2",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9"
     },
@@ -20,7 +21,8 @@
         "nunomaduro/collision": "^8.0",
         "phpunit/phpunit": "^11.0",
         "rector/rector": "^1.0",
-        "spatie/laravel-ignition": "^2.4"
+        "spatie/laravel-ignition": "^2.4",
+        "symplify/easy-coding-standard": "10.3.3"
     },
     "autoload": {
         "psr-4": {
