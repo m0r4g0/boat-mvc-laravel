@@ -18,6 +18,7 @@ class UsersTableSeeder extends Seeder
 
         // Create the second user
         User::factory()->create([
+            'id' => 2,
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'password' => 'password'

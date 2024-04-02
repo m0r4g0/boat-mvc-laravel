@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Boat;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\QueryException;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -15,7 +19,7 @@ class BoatController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): View
     {
         $boats = Boat::all();
         return view('boats.index', compact('boats'));
@@ -24,7 +28,7 @@ class BoatController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): View
     {
         return view('boats.create');
     }
@@ -32,7 +36,7 @@ class BoatController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         try {
             // Validate the request data
@@ -60,9 +64,7 @@ class BoatController extends Controller
                     // If the exact slug exists, find the maximum appended number
                     $maxAppendedNumber = Boat::where('slug', 'like', $slug . '-%')
                         ->get()
-                        ->map(function ($boat) use ($slug) {
-                            return intval(str_replace($slug . '-', '', $boat->slug));
-                        })
+                        ->map(fn ($boat) => intval(str_replace($slug . '-', '', (string) $boat->slug)))
                         ->max();
 
                     // Increment the maximum number by 1 to generate the new slug
@@ -78,7 +80,7 @@ class BoatController extends Controller
                 ]);
             });
             return redirect()->route('boats.index')->with('success', 'Boat created successfully.');
-        } catch (QueryException $e) {
+        } catch (QueryException) {
             // Handle the error when the database is locked
             return redirect()->back()->with('error', 'Error: The boat creation process failed due to a database lock.');
         }
@@ -87,7 +89,7 @@ class BoatController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $idOrSlug)
+    public function show(string $idOrSlug): View
     {
         // Check if the parameter is numeric (ID) or a string (slug)
         if (ctype_digit($idOrSlug)) {
@@ -104,7 +106,7 @@ class BoatController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Boat $boat)
+    public function edit(Boat $boat): View|RedirectResponse
     {
         // Check if the authenticated user is the owner of the boat
         if (auth()->user()->id !== $boat->user_id) {
@@ -120,7 +122,7 @@ class BoatController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Boat $boat)
+    public function update(Request $request, Boat $boat): RedirectResponse
     {
         // Check if the authenticated user is the owner of the boat
         if (auth()->user()->id !== $boat->user_id) {
@@ -145,7 +147,7 @@ class BoatController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Boat $boat)
+    public function destroy(Boat $boat): RedirectResponse
     {
         // Check if the authenticated user is the owner of the boat
         if (auth()->user()->id !== $boat->user_id) {
