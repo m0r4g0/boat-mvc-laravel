@@ -2,18 +2,17 @@
 
 namespace Tests\Feature;
 
+use App\Models\Boat;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use App\Models\Boat;
-use App\Models\User;
 
 class BoatIdOrSlugTest extends TestCase
 {
     use RefreshDatabase;
 
     protected $user;
-
 
     protected function setUp(): void
     {
@@ -29,20 +28,20 @@ class BoatIdOrSlugTest extends TestCase
     public function testDisplayBoatWithId()
     {
         $boat = Boat::factory()->create();
-    
+
         $response = $this->get("/boats/{$boat->id}");
-    
+
         $response->assertStatus(200)
-                 ->assertSee($boat->name);
+            ->assertSee($boat->name);
     }
-    
+
     public function testDisplayBoatWithSlug()
     {
         $boat = Boat::factory()->create();
-    
+
         $response = $this->get("/boats/{$boat->slug}");
-    
+
         $response->assertStatus(200)
-                 ->assertSee($boat->name);
+            ->assertSee($boat->name);
     }
 }

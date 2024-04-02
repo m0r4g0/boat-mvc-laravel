@@ -13,6 +13,6 @@ class Boat extends Model
         'name',
         'category',
         'slug',
-        'user_id'
+        'user_id',
     ];
 }

@@ -3,15 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Boat;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
-
-
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class BoatController extends Controller
 {
@@ -43,19 +40,19 @@ class BoatController extends Controller
                 'name' => 'required|string',
                 'category' => ['required', Rule::in(['sailing-yacht', 'motor-boat'])],
             ]);
-        
+
             if ($validator->fails()) {
                 return redirect()->back()->withErrors($validator)->withInput();
             }
-        
+
             // Generate the slug from the provided name
             $slug = Str::slug($request->name);
-        
+
             // Use database transaction with locking to ensure atomicity and prevent race conditions
             DB::transaction(function () use ($request, $slug) {
                 // Lock the boats table to prevent other users from accessing it until the transaction is complete
                 Boat::lockForUpdate()->get();
-        
+
                 // Check if the slug already exists in the database
                 $existingBoat = Boat::where('slug', $slug)->first();
 
@@ -77,7 +74,7 @@ class BoatController extends Controller
                     'name' => $request->name,
                     'category' => $request->category,
                     'slug' => $slug,
-                    'user_id' => $user_id, 
+                    'user_id' => $user_id,
                 ]);
             });
             return redirect()->route('boats.index')->with('success', 'Boat created successfully.');
@@ -112,7 +109,9 @@ class BoatController extends Controller
         // Check if the authenticated user is the owner of the boat
         if (auth()->user()->id !== $boat->user_id) {
             // Unauthorized user, redirect back or show an error message
-            return redirect()->route('boats.index')->withErrors(['error' => 'You are not authorized to edit this boat.']);
+            return redirect()->route('boats.index')->withErrors([
+                'error' => 'You are not authorized to edit this boat.',
+            ]);
         }
 
         return view('boats.edit', compact('boat'));
@@ -121,38 +120,42 @@ class BoatController extends Controller
     /**
      * Update the specified resource in storage.
      */
-   public function update(Request $request, Boat $boat)
-{
-    // Check if the authenticated user is the owner of the boat
-    if (auth()->user()->id !== $boat->user_id) {
-        // Unauthorized user, redirect back or show an error message
-        return redirect()->route('boats.index')->withErrors(['error' => 'You are not authorized to edit this boat.']);
+    public function update(Request $request, Boat $boat)
+    {
+        // Check if the authenticated user is the owner of the boat
+        if (auth()->user()->id !== $boat->user_id) {
+            // Unauthorized user, redirect back or show an error message
+            return redirect()->route('boats.index')->withErrors([
+                'error' => 'You are not authorized to edit this boat.',
+            ]);
+        }
+
+        $request->validate([
+            'name' => 'required|string',
+            'category' => ['required', Rule::in(['sailing-yacht', 'motor-boat'])],
+        ]);
+
+        $boat->name = $request->name;
+        $boat->category = $request->category;
+        $boat->save();
+
+        return redirect()->route('boats.index')->with('success', 'Boat updated successfully.');
     }
 
-    $request->validate([
-        'name' => 'required|string',
-        'category' => ['required', Rule::in(['sailing-yacht', 'motor-boat'])],
-    ]);
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Boat $boat)
+    {
+        // Check if the authenticated user is the owner of the boat
+        if (auth()->user()->id !== $boat->user_id) {
+            // Unauthorized user, redirect back or show an error message
+            return redirect()->route('boats.index')->withErrors([
+                'error' => 'You are not authorized to edit this boat.',
+            ]);
+        }
 
-    $boat->name = $request->name;
-    $boat->category = $request->category;
-    $boat->save();
-
-    return redirect()->route('boats.index')->with('success', 'Boat updated successfully.');
-}
-
-/**
- * Remove the specified resource from storage.
- */
-public function destroy(Boat $boat)
-{
-    // Check if the authenticated user is the owner of the boat
-    if (auth()->user()->id !== $boat->user_id) {
-        // Unauthorized user, redirect back or show an error message
-        return redirect()->route('boats.index')->withErrors(['error' => 'You are not authorized to edit this boat.']);
+        $boat->delete();
+        return redirect()->route('boats.index')->with('success', 'Boat deleted successfully.');
     }
-
-    $boat->delete();
-    return redirect()->route('boats.index')->with('success', 'Boat deleted successfully.');
-}
 }

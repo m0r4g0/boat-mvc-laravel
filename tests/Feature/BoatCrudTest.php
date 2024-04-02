@@ -2,18 +2,17 @@
 
 namespace Tests\Feature;
 
+use App\Models\Boat;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use App\Models\Boat;
-use App\Models\User;
 
 class BoatCrudTest extends TestCase
 {
     use RefreshDatabase;
 
     protected $user;
-
 
     protected function setUp(): void
     {
@@ -57,7 +56,7 @@ class BoatCrudTest extends TestCase
             'id' => $boat->id,
             'name' => 'Updated Boat Name',
             'category' => 'motor-boat',
-            'user_id' =>  $this->user->id,
+            'user_id' => $this->user->id,
         ]);
     }
 
@@ -75,17 +74,24 @@ class BoatCrudTest extends TestCase
         ]);
     }
 
-
     // this is absurd. I am making slugs unique with increments
     public function testSlugUniqueness()
     {
-        $secondUser =  User::factory()->create([
+        $secondUser = User::factory()->create([
             'id' => 2,
             'email' => 'test2@test.com',
             'password' => bcrypt('password123'),
         ]);
-        $this->actingAs($this->user)->post('/boats', ['name' => 'Test Boat', 'category' => 'sailing-yacht', 'id' => $this->user->id]);
-        $response = $this->actingAs($secondUser)->post('/boats', ['name' => 'Test Boat', 'category' => 'motor-boat', 'id' => $secondUser->id]);
+        $this->actingAs($this->user)->post('/boats', [
+            'name' => 'Test Boat',
+            'category' => 'sailing-yacht',
+            'id' => $this->user->id,
+        ]);
+        $response = $this->actingAs($secondUser)->post('/boats', [
+            'name' => 'Test Boat',
+            'category' => 'motor-boat',
+            'id' => $secondUser->id,
+        ]);
         // $response->assertSessionHasErrors();
         $response->assertStatus(302); // Check if the response is a redirect
     }

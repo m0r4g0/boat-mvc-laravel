@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Boat;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use App\Models\User;
-use App\Models\Boat;
-
 
 class AuthTest extends TestCase
 {
@@ -67,12 +66,14 @@ class AuthTest extends TestCase
 
     public function testUserCanEditOwnBoat()
     {
-        $user =  User::factory()->create([
+        $user = User::factory()->create([
             'email' => 'test@example.com',
             'password' => bcrypt('password123'),
         ]);
 
-        $boat = Boat::factory()->create(['user_id' => $user->id]);
+        $boat = Boat::factory()->create([
+            'user_id' => $user->id,
+        ]);
 
         $response = $this->actingAs($user)->get("/boats/{$boat->id}/edit");
 
@@ -81,12 +82,12 @@ class AuthTest extends TestCase
 
     public function testUserCannotEditOtherUsersBoat()
     {
-        $user =  User::factory()->create([
+        $user = User::factory()->create([
             'email' => 'test@example.com',
             'password' => bcrypt('password123'),
         ]);
 
-        $secondUser =  User::factory()->create([
+        $secondUser = User::factory()->create([
             'id' => 2,
             'email' => 'test2@test.com',
             'password' => bcrypt('123456'),
@@ -95,7 +96,7 @@ class AuthTest extends TestCase
         $boat = Boat::factory()->create([
             'name' => 'Test Boat',
             'category' => 'sailing-yacht',
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
 
         $response = $this->actingAs($secondUser)->get("/boats/{$boat->id}/edit");
