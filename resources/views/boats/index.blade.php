@@ -6,7 +6,15 @@
     <h1>Boats</h1>
     
     <a href="{{ route('boats.create') }}" class="btn btn-primary">Create Boat</a>
-
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
     @if ($boats->isEmpty())
         <p>No boats found.</p>
     @else

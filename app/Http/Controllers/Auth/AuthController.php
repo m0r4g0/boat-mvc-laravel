@@ -23,7 +23,7 @@ class AuthController extends Controller
             return redirect()->intended('/boats'); // Redirect to the intended URL or any desired URL
         } else {
             // Authentication failed
-            return back()->withErrors(['email' => 'Invalid credentials']); // Redirect back with error message
+            return redirect('/login')->withErrors(['email' => 'Invalid credentials']); // Redirect back with error message
         }
     }
 
@@ -33,6 +33,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/boats');
     }
 }

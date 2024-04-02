@@ -18,7 +18,6 @@ use App\Http\Controllers\Auth\AuthController;
 
 Route::group(['middleware' => 'web'], function () {
     Route::redirect('/', '/boats');
-
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
