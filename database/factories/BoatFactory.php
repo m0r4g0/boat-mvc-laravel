@@ -29,6 +29,7 @@ class BoatFactory extends Factory
             'name' => $name,
             'category' => $this->faker->randomElement(['sailing-yacht', 'motor-boat']),
             'slug' => Str::slug($name),
+            'user_id' => 1
         ];
     }
 }

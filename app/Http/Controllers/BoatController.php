@@ -8,6 +8,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
+
 
 
 
@@ -35,51 +37,56 @@ class BoatController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the request data
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
-            'category' => ['required', Rule::in(['sailing-yacht', 'motor-boat'])],
-        ]);
-    
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-    
-        // Generate the slug from the provided name
-        $slug = Str::slug($request->name);
-    
-        // Use database transaction with locking to ensure atomicity and prevent race conditions
-        DB::transaction(function () use ($request, $slug) {
-            // Lock the boats table to prevent other users from accessing it until the transaction is complete
-            Boat::lockForUpdate()->get();
-    
-            // Check if the slug already exists in the database
-            $existingBoat = Boat::where('slug', $slug)->first();
-
-            if ($existingBoat) {
-                // If the exact slug exists, find the maximum appended number
-                $maxAppendedNumber = Boat::where('slug', 'like', $slug . '-%')
-                    ->get()
-                    ->map(function ($boat) use ($slug) {
-                        return intval(str_replace($slug . '-', '', $boat->slug));
-                    })
-                    ->max();
-
-                // Increment the maximum number by 1 to generate the new slug
-                $slug = $slug . '-' . ($maxAppendedNumber + 1);
-            }
-            $user_id = auth()->id();
-            // Create the boat
-            Boat::create([
-                'name' => $request->name,
-                'category' => $request->category,
-                'slug' => $slug,
-                'user_id' => $user_id, 
+        try {
+            // Validate the request data
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string',
+                'category' => ['required', Rule::in(['sailing-yacht', 'motor-boat'])],
             ]);
-        });
-    
-        return redirect()->route('boats.index')->with('success', 'Boat created successfully.');
+        
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+        
+            // Generate the slug from the provided name
+            $slug = Str::slug($request->name);
+        
+            // Use database transaction with locking to ensure atomicity and prevent race conditions
+            DB::transaction(function () use ($request, $slug) {
+                // Lock the boats table to prevent other users from accessing it until the transaction is complete
+                Boat::lockForUpdate()->get();
+        
+                // Check if the slug already exists in the database
+                $existingBoat = Boat::where('slug', $slug)->first();
+
+                if ($existingBoat) {
+                    // If the exact slug exists, find the maximum appended number
+                    $maxAppendedNumber = Boat::where('slug', 'like', $slug . '-%')
+                        ->get()
+                        ->map(function ($boat) use ($slug) {
+                            return intval(str_replace($slug . '-', '', $boat->slug));
+                        })
+                        ->max();
+
+                    // Increment the maximum number by 1 to generate the new slug
+                    $slug = $slug . '-' . ($maxAppendedNumber + 1);
+                }
+                $user_id = auth()->id();
+                // Create the boat
+                Boat::create([
+                    'name' => $request->name,
+                    'category' => $request->category,
+                    'slug' => $slug,
+                    'user_id' => $user_id, 
+                ]);
+            });
+            return redirect()->route('boats.index')->with('success', 'Boat created successfully.');
+        } catch (QueryException $e) {
+            // Handle the error when the database is locked
+            return redirect()->back()->with('error', 'Error: The boat creation process failed due to a database lock.');
+        }
     }
+
     /**
      * Display the specified resource.
      */
