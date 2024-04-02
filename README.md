@@ -13,8 +13,12 @@ The Boat Application is a web-based platform developed as part of a coding chall
 ## Setup Instructions
 1. Clone the repository to your local machine.
 2. Navigate to the project directory.
-3. Run `docker-compose up -d --build` to start the Docker containers.
-4. Access the PHP container's shell with `docker-compose exec php bash`.
+3. Copy `.env.example` to `.env`
+4. Run `docker-compose up -d --build` to start the Docker containers.
+5. Access the PHP container's shell with `docker-compose exec php bash`.
+6. Run `composer install`
+7. Run `php artisan migrate`
+8. Run `php artisan db:seed`
 5. Access the application in your browser at `http://localhost:80`.
 
 ## Testing
